@@ -21,6 +21,20 @@ const Home: React.FC = () => {
   const history = useHistory();
   const { tasks, deleteTask } = useTasks();
 
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8100/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+      deleteTask(taskId); // Update local state after successful deletion
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -42,10 +56,12 @@ const Home: React.FC = () => {
           ) : (
             tasks.map(task => (
               <TasksCard 
-                key={task.id}
+                key={task._id}
+                taskId={task._id} // Pass taskId to TasksCard
                 taskName={task.name} 
+                priority={task.priority}
                 description={task.description}
-                onDelete={() => deleteTask(task.id)} 
+                onDelete={handleDeleteTask} // Use handleDeleteTask
               />
             ))
           )}
