@@ -2,12 +2,18 @@ import React from 'react';
 import { IonItem, IonCheckbox, IonLabel, IonItemSliding, IonItemOptions, IonItemOption } from '@ionic/react';
 
 interface TasksCardProps {
+  taskId: string; // Add taskId prop
   taskName: string;
   description?: string; // Added optional description prop
-  onDelete: () => void;
+  priority: string; // Add priority prop
+  onDelete: (id: string) => void; // Update onDelete to accept an id
 }
 
-const TasksCard: React.FC<TasksCardProps> = ({ taskName, description, onDelete }) => {
+const TasksCard: React.FC<TasksCardProps> = ({ taskId, taskName, description, priority, onDelete }) => {
+  const handleDelete = () => {
+    onDelete(taskId); // Pass the taskId to the onDelete function
+  };
+
   return (
     <IonItemSliding>
       <IonItem>
@@ -15,10 +21,11 @@ const TasksCard: React.FC<TasksCardProps> = ({ taskName, description, onDelete }
         <IonLabel>
           <h2>{taskName}</h2>
           {description && <p>{description}</p>}
+          <p>Priority: {priority}</p>
         </IonLabel>
       </IonItem>
       <IonItemOptions side="end">
-        <IonItemOption color="danger" onClick={onDelete}>
+        <IonItemOption color="danger" onClick={handleDelete}>
           Eliminar
         </IonItemOption>
       </IonItemOptions>

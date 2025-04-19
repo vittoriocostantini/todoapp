@@ -1,15 +1,16 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export interface Task {
-  id: number;
+  _id: string;
   name: string;
   description: string;
+  priority: string; // Add priority field
 }
 
 interface TaskContextType {
   tasks: Task[];
-  addTask: (name: string, description: string) => void;
-  deleteTask: (id: number) => void;
+  addTask: (name: string, description: string, priority: string) => void; // Update function signature
+  deleteTask: (_id: string) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -17,17 +18,32 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export const TaskProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const addTask = (name: string, description: string) => {
-    const newTask: Task = {
-      id: Date.now(),
+  const addTask = async (name: string, description: string, priority: string) => { // Update function signature
+    const newTask = {
       name,
-      description
+      description,
+      priority // Include priority in the task object
     };
-    setTasks([...tasks, newTask]);
+    try {
+      const response = await fetch('http://localhost:8100/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newTask)
+      });
+      if (!response.ok) {
+        throw new Error('Error al crear la tarea');
+      }
+      const savedTask = await response.json();
+      setTasks([...tasks, savedTask]);
+    } catch (error) {
+      console.error('Error al agregar la tarea:', error);
+    }
   };
 
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const deleteTask = (_id: string) => {
+    setTasks(tasks.filter(task => task._id !== _id));
   };
 
   return (
